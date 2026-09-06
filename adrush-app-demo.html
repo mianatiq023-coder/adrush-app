@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdRush</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0C16;
+    --bg-glow: #131730;
+    --card: #141827;
+    --card-2: #1B2033;
+    --violet: #7C5CFF;
+    --violet-soft: #A896FF;
+    --cyan: #22D3EE;
+    --coin: #FFD166;
+    --text: #F2F1FA;
+    --muted: #8B8AA3;
+    --line: rgba(255,255,255,0.07);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height:100vh;
+    display:flex; justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter: blur(80px);
+    z-index:0;
+    pointer-events:none;
+  }
+  .blob-1{ width:280px; height:280px; background: rgba(124,92,255,0.45); top:-60px; left:-60px; }
+  .blob-2{ width:260px; height:260px; background: rgba(34,211,238,0.35); top:220px; right:-80px; }
+  .blob-3{ width:240px; height:240px; background: rgba(255,209,102,0.3); bottom:-60px; left:20%; }
+  .app{ width:100%; max-width:430px; padding:22px 18px 40px; position:relative; z-index:1; }
+
+  .glass{
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+
+  header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .brand{
+    font-family:'Baloo 2',sans-serif; font-size:23px; font-weight:800;
+    display:flex; align-items:center; gap:8px;
+    text-shadow: 0 0 18px rgba(124,92,255,0.6);
+  }
+  .brand .bolt{ color: var(--cyan); text-shadow: 0 0 14px rgba(34,211,238,0.8); }
+  .gear-btn{
+    width:38px; height:38px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; cursor:pointer;
+  }
+
+  .coin-card{
+    position:relative;
+    border-radius:22px; padding:24px 22px; overflow:hidden; margin-bottom:20px;
+  }
+  .coin-card::before{
+    content:""; position:absolute; width:200px; height:200px;
+    background: radial-gradient(circle, rgba(255,209,102,0.25), transparent 70%);
+    top:-80px; right:-50px; pointer-events:none;
+  }
+  .coin-label{ font-size:13px; color: var(--muted); margin-bottom:8px; }
+  .coin-value{
+    font-family:'Baloo 2',sans-serif; font-size:36px; font-weight:800; color: var(--coin);
+    display:flex; align-items:center; gap:8px;
+    text-shadow: 0 0 22px rgba(255,209,102,0.55);
+  }
+  .stats-row{ display:flex; gap:10px; margin-top:16px; position:relative; }
+  .stat{
+    flex:1; border-radius:12px; padding:10px 8px; text-align:center;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .stat .n{ font-weight:700; font-size:15px; }
+  .stat .l{ font-size:11px; color: var(--muted); margin-top:2px; }
+
+  .section-title{ font-size:13.5px; color: var(--muted); margin: 20px 2px 10px; }
+
+  .ad-card{ border-radius:20px; padding:20px; }
+  .ad-visual{
+    height:130px; border-radius:14px;
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--muted); font-size:13px; margin-bottom:16px; position:relative;
+  }
+  .ad-timer{
+    position:absolute; top:10px; right:10px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    border:1px solid rgba(255,255,255,0.2);
+    padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; color:#fff;
+  }
+  .watch-btn{
+    width:100%; padding:16px; border-radius:15px;
+    background: rgba(124,92,255,0.28);
+    backdrop-filter: blur(14px);
+    border:1px solid rgba(168,150,255,0.5);
+    box-shadow: 0 0 24px rgba(124,92,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    color:#fff; font-size:16px; font-weight:800; cursor:pointer; font-family:'Baloo 2',sans-serif;
+  }
+  .watch-btn:disabled{ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: var(--muted); cursor:not-allowed; box-shadow:none; }
+  .hint{ font-size:12px; color: var(--muted); margin-top:10px; text-align:center; }
+
+  /* ری ڈیم سیکشن */
+  .redeem-grid{ display:flex; gap:12px; }
+  .redeem-card{
+    flex:1; border-radius:16px; padding:16px 12px; text-align:center;
+  }
+  .redeem-card .ic{ font-size:26px; margin-bottom:8px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.25)); }
+  .redeem-card .t{ font-size:13px; font-weight:700; margin-bottom:4px; }
+  .redeem-card .cost{ font-size:11.5px; color: var(--coin); margin-bottom:10px; }
+  .redeem-btn{
+    width:100%; padding:9px; border-radius:9px;
+    background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.16);
+    color: var(--violet-soft); font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .redeem-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .badge-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .badge-chip{
+    border-radius:12px; padding:10px 14px; font-size:12.5px; display:flex; align-items:center; gap:6px;
+    opacity:0.35;
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .badge-chip.unlocked{
+    opacity:1; border-color: rgba(255,209,102,0.5);
+    background: rgba(255,209,102,0.1);
+    box-shadow: 0 0 16px rgba(255,209,102,0.25);
+  }
+
+  .history-item{
+    border-radius:14px; padding:13px 15px; display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:9px; font-size:14px;
+  }
+  .history-item .t{ font-size:11.5px; color: var(--muted); margin-top:2px; }
+  .plus{ color: var(--cyan); font-weight:700; }
+  .empty{ color: var(--muted); font-size:13px; text-align:center; padding:20px 0; }
+
+  .note{
+    margin-top:24px; font-size:11px; color: var(--muted); text-align:center; line-height:1.8;
+    border-top:1px solid var(--line); padding-top:14px;
+  }
+
+  /* اونر ڈیش بورڈ ماڈل */
+  .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display:none; align-items:flex-end; justify-content:center; z-index:70; }
+  .overlay.show{ display:flex; }
+  .sheet{
+    width:100%; max-width:430px; border-radius:22px 22px 0 0; padding:22px 18px 30px;
+    max-height:85vh; overflow-y:auto; animation: up .25s ease;
+    background: rgba(20,24,39,0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border:1px solid rgba(255,255,255,0.14);
+    border-bottom:none;
+  }
+  @keyframes up{ from{ transform:translateY(30px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  .sheet h3{ margin:0 0 4px; font-size:17px; font-family:'Baloo 2',sans-serif; }
+  .sheet .sub{ font-size:12px; color: var(--muted); margin-bottom:16px; line-height:1.6; }
+
+  .rev-card{
+    border-radius:18px; padding:20px; margin-bottom:14px;
+    background: rgba(74,222,156,0.08);
+    border:1px solid rgba(74,222,156,0.3);
+    box-shadow: 0 0 30px rgba(74,222,156,0.12), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .rev-label{ font-size:12.5px; color: var(--muted); margin-bottom:6px; }
+  .rev-value{ font-family:'Baloo 2',sans-serif; font-size:30px; font-weight:800; color:#4ADE9C; text-shadow: 0 0 20px rgba(74,222,156,0.5); }
+  .rev-sub{ font-size:11.5px; color: var(--muted); margin-top:6px; }
+
+  .dash-stats{ display:flex; gap:10px; margin-bottom:16px; }
+  .dash-stat{
+    flex:1; border-radius:12px; padding:12px 8px; text-align:center;
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .dash-stat .n{ font-weight:700; font-size:16px; }
+  .dash-stat .l{ font-size:10.5px; color: var(--muted); margin-top:3px; }
+
+  .sim-btn{
+    width:100%; padding:13px; border-radius:12px;
+    background: rgba(124,92,255,0.15);
+    border:1px solid rgba(168,150,255,0.4);
+    color: var(--violet-soft); font-size:13.5px; font-weight:700; cursor:pointer;
+  }
+  .modal-close{ width:100%; margin-top:12px; padding:10px; background:none; border:none; color: var(--muted); font-size:13.5px; cursor:pointer; }
+
+  /* گوگل لاگ ان اسکرین */
+  .login-screen{
+    position:fixed; inset:0; z-index:100;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:24px; background: var(--bg);
+  }
+  .login-card{
+    width:100%; max-width:380px;
+    border-radius:26px; padding:36px 26px;
+    text-align:center;
+    position:relative; z-index:1;
+  }
+  .login-logo{
+    font-family:'Baloo 2',sans-serif; font-size:32px; font-weight:800;
+    margin-bottom:6px;
+    text-shadow: 0 0 22px rgba(124,92,255,0.6);
+  }
+  .login-logo .bolt{ color: var(--cyan); text-shadow: 0 0 16px rgba(34,211,238,0.8); }
+  .login-sub{ font-size:13.5px; color: var(--muted); margin-bottom:34px; line-height:1.7; }
+
+  .google-btn{
+    width:100%; padding:14px; border-radius:14px;
+    background: rgba(255,255,255,0.95);
+    border:1px solid rgba(255,255,255,0.6);
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    font-size:14.5px; font-weight:700; color:#3C3C3C;
+    cursor:pointer; font-family:'Inter',sans-serif;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .google-btn svg{ width:19px; height:19px; }
+
+  .acct-list{ margin-top:18px; display:none; text-align:right; }
+  .acct-item{
+    display:flex; align-items:center; gap:12px;
+    padding:13px 14px; border-radius:14px;
+    margin-bottom:10px; cursor:pointer;
+    text-align:left;
+  }
+  .acct-avatar{
+    width:36px; height:36px; border-radius:50%;
+    background: linear-gradient(135deg, var(--violet), var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:#fff; flex-shrink:0;
+  }
+  .acct-name{ font-size:13.5px; font-weight:700; }
+  .acct-email{ font-size:11.5px; color: var(--muted); }
+
+  .login-loading{ display:none; margin-top:20px; font-size:13px; color: var(--muted); }
+  .spinner{
+    width:22px; height:22px; border-radius:50%;
+    border:3px solid rgba(255,255,255,0.15);
+    border-top-color: var(--violet-soft);
+    animation: spin 0.8s linear infinite;
+    margin:0 auto 10px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .toast{
+    position:fixed; bottom:28px; left:50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card-2); border:1px solid rgba(124,92,255,0.35);
+    padding:12px 20px; border-radius:12px; font-size:13.5px;
+    opacity:0; transition:.3s; pointer-events:none; max-width:88%; text-align:center; z-index:80;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card glass">
+    <div class="login-logo"><span class="bolt">⚡</span>AdRush</div>
+    <div class="login-sub">Ads dekho, coins jeeto, rewards unlock karo.<br>Shuru karne ke liye sign in karein.</div>
+
+    <button class="google-btn" id="googleBtn" onclick="showAccounts()">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.6 34.7 27 35.5 24 35.5c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.6 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.4l6.6 5.6C41.4 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+      Sign in with Google
+    </button>
+
+    <div class="acct-list" id="acctList">
+      <div class="acct-item glass" onclick="selectAccount('Ali Ahmed', 'ali.ahmed@gmail.com')">
+        <div class="acct-avatar">A</div>
+        <div>
+          <div class="acct-name">Ali Ahmed</div>
+          <div class="acct-email">ali.ahmed@gmail.com</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-loading" id="loginLoading">
+      <div class="spinner"></div>
+      Sign in ho raha hai...
+    </div>
+  </div>
+</div>
+
+<div id="mainWrap" style="display:none;">
+<div class="app">
+  <header>
+    <div class="brand"><span class="bolt">⚡</span>AdRush</div>
+    <button class="gear-btn glass" onclick="openDashboard()">👑</button>
+  </header>
+
+  <div class="coin-card glass">
+    <div class="coin-label">Aapke Coins</div>
+    <div class="coin-value">🪙 <span id="coinValue">0</span></div>
+    <div class="stats-row">
+      <div class="stat"><div class="n" id="adsWatched">0</div><div class="l">Ads Dekhay</div></div>
+      <div class="stat"><div class="n" id="dayStreak">1</div><div class="l">Din Streak</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Ad Dekho, Coins Jeeto</div>
+  <div class="ad-card glass">
+    <div class="ad-visual" id="adVisual">Ad yahan chalay gi</div>
+    <button class="watch-btn" id="watchBtn" onclick="startAd()">▶ Ad Dekhein (+10 Coins)</button>
+    <div class="hint">Har ad 15 second ki hai. Coins se rewards unlock karein.</div>
+  </div>
+
+  <div class="section-title">Coins Se Redeem Karein</div>
+  <div class="redeem-grid">
+    <div class="redeem-card glass">
+      <div class="ic">🎡</div>
+      <div class="t">Spin Wheel</div>
+      <div class="cost">50 Coins</div>
+      <button class="redeem-btn" onclick="spinWheel()">Spin Karein</button>
+    </div>
+    <div class="redeem-card glass">
+      <div class="ic">🎨</div>
+      <div class="t">App Theme</div>
+      <div class="cost">120 Coins</div>
+      <button class="redeem-btn" onclick="redeemTheme()">Unlock</button>
+    </div>
+  </div>
+
+  <div class="section-title">Aapke Badges</div>
+  <div class="badge-row" id="badgeRow"></div>
+
+  <div class="section-title">Recent Activity</div>
+  <div id="historyList"><div class="empty">Abhi tak koi ad nahi dekhi</div></div>
+
+  <div class="note">Ads dekh kar sirf in-app Coins milte hain jo rewards ke liye use hotay hain — yeh real cash nahi hai. Asal ad-revenue AdMob ke zariye seedha app ke owner ke account mein jaata hai.</div>
+</div>
+</div>
+
+<!-- اونر ڈیش بورڈ -->
+<div class="overlay" id="dashOverlay">
+  <div class="sheet">
+    <h3>👑 Owner Dashboard</h3>
+    <div class="sub">Yeh sirf app ke owner ko nazar aata hai. Yahan asal AdMob revenue track hota hai — jo seedha aapke bank account mein transfer hota hai.</div>
+
+    <div class="rev-card">
+      <div class="rev-label">Total Estimated Ad Revenue</div>
+      <div class="rev-value" id="ownerRevenue">Rs 0.00</div>
+      <div class="rev-sub">Real AdMob dashboard mein yeh number aapko Google se milega</div>
+    </div>
+
+    <div class="dash-stats">
+      <div class="dash-stat"><div class="n" id="dashUsers">1</div><div class="l">Active Users</div></div>
+      <div class="dash-stat"><div class="n" id="dashViews">0</div><div class="l">Total Ad Views</div></div>
+      <div class="dash-stat"><div class="n" id="dashAvg">0.00</div><div class="l">Rs / User Today</div></div>
+    </div>
+
+    <button class="sim-btn" onclick="simulateNewUsers()">+ Demo: 50 Naye Users Ne Ads Dekhi</button>
+    <button class="modal-close" onclick="closeDashboard()">Band Karein</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showAccounts(){
+    document.getElementById('acctList').style.display = 'block';
+    document.getElementById('googleBtn').style.display = 'none';
+  }
+
+  function selectAccount(name, email){
+    document.getElementById('acctList').style.display = 'none';
+    document.getElementById('loginLoading').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainWrap').style.display = 'block';
+      showToast('Welcome, ' + name + '! 🎉');
+    }, 1200);
+  }
+
+  let coins = 0, adsCount = 0, adInProgress = false;
+  let history = [];
+  const badges = [
+    { id:'starter', label:'🌱 Starter', min:1 },
+    { id:'regular', label:'🔥 Regular', min:10 },
+    { id:'pro', label:'💎 Pro Viewer', min:30 },
+    { id:'legend', label:'👑 Legend', min:60 },
+  ];
+
+  // اونر ڈیش بورڈ ڈیٹا (سمولیشن)
+  let totalUsers = 1;
+  let totalViews = 0;
+  const revenuePerView = 0.5; // AdMob se aoseton owner ko fi-view milne wali rakam (PKR)
+
+  const watchBtn = document.getElementById('watchBtn');
+  const adVisual = document.getElementById('adVisual');
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 2300);
+  }
+
+  function updateUI(){
+    document.getElementById('coinValue').textContent = coins;
+    document.getElementById('adsWatched').textContent = adsCount;
+
+    const list = document.getElementById('historyList');
+    if(history.length === 0){
+      list.innerHTML = '<div class="empty">Abhi tak koi ad nahi dekhi</div>';
+    } else {
+      list.innerHTML = history.slice().reverse().map(h => `
+        <div class="history-item glass">
+          <div><div>${h.label}</div><div class="t">${h.time}</div></div>
+          <div class="plus">${h.amount}</div>
+        </div>
+      `).join('');
+    }
+
+    const badgeRow = document.getElementById('badgeRow');
+    badgeRow.innerHTML = badges.map(b => `
+      <div class="badge-chip glass ${adsCount >= b.min ? 'unlocked' : ''}">${b.label}</div>
+    `).join('');
+
+    updateDashboard();
+  }
+
+  function updateDashboard(){
+    const revenue = totalViews * revenuePerView;
+    document.getElementById('ownerRevenue').textContent = 'Rs ' + revenue.toFixed(2);
+    document.getElementById('dashUsers').textContent = totalUsers;
+    document.getElementById('dashViews').textContent = totalViews;
+    document.getElementById('dashAvg').textContent = totalUsers > 0 ? (revenue/totalUsers).toFixed(2) : '0.00';
+  }
+
+  function startAd(){
+    if(adInProgress) return;
+    adInProgress = true;
+    watchBtn.disabled = true;
+    let seconds = 15;
+    adVisual.innerHTML = `<div class="ad-timer">${seconds}s</div>Ad chal rahi hai...`;
+    watchBtn.textContent = 'Ad Chal Rahi Hai...';
+    const iv = setInterval(() => {
+      seconds--;
+      adVisual.innerHTML = `<div class="ad-timer">${seconds}s</div>Ad chal rahi hai...`;
+      if(seconds <= 0){
+        clearInterval(iv);
+        finishAd();
+      }
+    }, 1000);
+  }
+
+  function finishAd(){
+    coins += 10;
+    adsCount++;
+    totalViews++; // اونر کی حقیقی آمدنی کا شمار
+    const now = new Date();
+    history.push({ label:'Ad Complete Hui', amount:'+10 🪙', time: now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}) });
+    adVisual.innerHTML = 'Ad yahan chalay gi';
+    watchBtn.disabled = false;
+    watchBtn.textContent = '▶ Ad Dekhein (+10 Coins)';
+    adInProgress = false;
+    showToast('+10 Coins mil gaye!');
+    updateUI();
+  }
+
+  function spinWheel(){
+    if(coins < 50){ showToast('Kam az kam 50 Coins chahiye'); return; }
+    coins -= 50;
+    const rewards = ['🎁 Bonus 20 Coins!', '⭐ Golden Frame Unlock!', '🎯 Try Again Next Time', '🪙 Extra 15 Coins!'];
+    const r = rewards[Math.floor(Math.random()*rewards.length)];
+    if(r.includes('20')) coins += 20;
+    if(r.includes('15')) coins += 15;
+    history.push({ label:'Spin Wheel: ' + r, amount:'-50 🪙', time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) });
+    showToast(r);
+    updateUI();
+  }
+
+  function redeemTheme(){
+    if(coins < 120){ showToast('Kam az kam 120 Coins chahiye'); return; }
+    coins -= 120;
+    history.push({ label:'Naya Theme Unlock Hua 🎨', amount:'-120 🪙', time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) });
+    showToast('🎨 Naya theme unlock ho gaya!');
+    updateUI();
+  }
+
+  // اونر ڈیش بورڈ
+  function openDashboard(){ updateDashboard(); document.getElementById('dashOverlay').classList.add('show'); }
+  function closeDashboard(){ document.getElementById('dashOverlay').classList.remove('show'); }
+  function simulateNewUsers(){
+    totalUsers += 50;
+    totalViews += 50 * 8; // har naya user aoseton 8 ads dekhta hai
+    showToast('50 naye users ne app use ki — revenue update ho gaya');
+    updateDashboard();
+  }
+
+  updateUI();
+</script>
+
+</body>
+</html>
